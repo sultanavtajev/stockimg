@@ -8,3 +8,5 @@ Dette prosjektet er en Next.js-applikasjon som automatisk genererer bilder ved �
 4. **Automatiser prosessen:** Når et bilde er publisert, starter samme prosess på nytt automatisk uten noen manuell interaksjon i applikasjonen.
 
 Applikasjonen er designet for å kjøre kontinuerlig og generere nye bilder så snart de forrige er publisert på frontend.
+
+

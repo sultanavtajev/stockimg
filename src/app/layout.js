@@ -6,8 +6,8 @@ import Footer from "@/components/footer.js";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "nexttemplate",
-  description: "nexttemplate",
+  title: "AI-bilder",
+  description: "Generer kreative bilder med DALL-E fra OpenAI",
 };
 
 export default function RootLayout({ children }) {
