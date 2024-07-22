@@ -1,30 +1,23 @@
+"use client";
 import ClientComponent from "@/components/client";
 import axios from "axios";
-import cloudinary from "cloudinary";
+import { useEffect, useState } from "react";
 
-cloudinary.v2.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+export default function Home() {
+  const [initialImages, setInitialImages] = useState([]);
 
-async function fetchImagesFromCloudinary() {
-  try {
-    const result = await cloudinary.v2.api.resources({
-      type: "upload",
-      prefix: process.env.CLOUDINARY_FOLDER,
-      max_results: 100,
-    });
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await axios.get("/api/fetchImages");
+        setInitialImages(response.data);
+      } catch (error) {
+        console.error("Failed to fetch images from API:", error);
+      }
+    };
 
-    return result.resources.map((file) => file.secure_url);
-  } catch (error) {
-    console.error("Failed to fetch images from Cloudinary:", error);
-    return [];
-  }
-}
-
-export default async function Home() {
-  const initialImages = await fetchImagesFromCloudinary();
+    fetchImages();
+  }, []);
 
   return (
     <main className="flex-1">
