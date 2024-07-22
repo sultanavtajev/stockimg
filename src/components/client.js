@@ -8,7 +8,6 @@ import axios from "axios";
 export default function ClientComponent({ initialImages }) {
   const [images, setImages] = useState(initialImages);
   const [loading, setLoading] = useState(false);
-  const isGeneratingRef = useRef(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
   const generateImage = async () => {
@@ -28,21 +27,7 @@ export default function ClientComponent({ initialImages }) {
       console.error("Error generating image:", error);
     } finally {
       setLoading(false);
-      if (isGeneratingRef.current) {
-        generateImage();
-      }
     }
-  };
-
-  const startGenerating = () => {
-    if (!isGeneratingRef.current) {
-      isGeneratingRef.current = true;
-      generateImage();
-    }
-  };
-
-  const stopGenerating = () => {
-    isGeneratingRef.current = false;
   };
 
   const handleImageClick = (image) => {
@@ -68,15 +53,9 @@ export default function ClientComponent({ initialImages }) {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4">
-      <div className="flex w-full max-w-sm items-center space-x-2 mb-8">
-        <Button
-          onClick={startGenerating}
-          disabled={loading || isGeneratingRef.current}
-        >
-          Start Generering
-        </Button>
-        <Button onClick={stopGenerating} disabled={!isGeneratingRef.current}>
-          Stopp Generering
+      <div className="flex w-full max-w-sm items-center justify-center space-x-2 mb-8">
+        <Button onClick={generateImage} disabled={loading}>
+          {loading ? "Genererer..." : "Generer bilde"}
         </Button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -88,6 +67,7 @@ export default function ClientComponent({ initialImages }) {
               width={500}
               height={500}
               className="rounded-lg shadow-lg"
+              onClick={() => handleImageClick(image)}
             />
           </div>
         ))}
