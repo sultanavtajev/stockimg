@@ -1,23 +1,24 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
-import fs from "fs";
-import path from "path";
 import axios from "axios";
+import cloudinary from "cloudinary";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-export const maxDuration = 55;
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// Sett opp OpenAI-klienten
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Sørg for å sette OPENAI_API_KEY i miljøvariablene dine
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(request) {
   console.log("Mottatt POST-forespørsel for å generere bilde");
 
   try {
-    const { prompt } = await request.json();
+    const formData = await request.formData();
+    const prompt = formData.get("prompt");
 
     if (!prompt) {
       console.error("Ingen prompt funnet i forespørselen");
@@ -55,17 +56,33 @@ export async function POST(request) {
     });
     const buffer = Buffer.from(imageResponse.data, "binary");
 
-    // Lagre bildet i mappen "images" under "public"
-    const imageName = `image-${Date.now()}.png`;
-    const imagePath = path.join(process.cwd(), "public", "images", imageName);
+    // Last opp bildet til Cloudinary
+    try {
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.v2.uploader.upload_stream(
+          { folder: process.env.CLOUDINARY_FOLDER },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
 
-    fs.writeFileSync(imagePath, buffer);
+        uploadStream.end(buffer);
+      });
 
-    const imageUrlPath = `/images/${imageName}`;
+      console.log("Bilde lastet opp til Cloudinary:", result.secure_url);
 
-    console.log("Bilde lagret på:", imageUrlPath);
-
-    return NextResponse.json({ imageUrl: imageUrlPath });
+      return NextResponse.json({ imageUrl: result.secure_url });
+    } catch (uploadError) {
+      console.error("Feil ved opplasting til Cloudinary:", uploadError);
+      return NextResponse.json(
+        { error: "Feil ved opplasting til Cloudinary" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("Feil ved kall til OpenAI:", error);
     return NextResponse.json(

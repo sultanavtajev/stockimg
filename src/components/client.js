@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import axios from "axios";
@@ -13,29 +13,23 @@ export default function ClientComponent({ initialImages }) {
 
   const generateImage = async () => {
     setLoading(true);
-    console.log("Starter generering...");
     try {
-      // Steg 1: Hent en tilfeldig bildeprompt fra OpenAI
       const promptResponse = await axios.post("/api/generatePrompt");
       const prompt = promptResponse.data.prompt;
 
-      // Steg 2: Send prompten til DALL-E for å generere bildet
-      const imageResponse = await axios.post("/api/generateImage", { prompt });
+      const imageResponse = await axios.post(
+        "/api/generateImage",
+        new URLSearchParams({ prompt })
+      );
       const imageUrl = imageResponse.data.imageUrl;
 
-      // Steg 3: Oppdater bilde-listen
       setImages((prevImages) => [imageUrl, ...prevImages]);
     } catch (error) {
       console.error("Error generating image:", error);
     } finally {
       setLoading(false);
-      console.log("Ferdig med generering.");
-      // Start neste generering hvis fortsatt i genereringsmodus
       if (isGeneratingRef.current) {
-        console.log("Starter ny generering...");
         generateImage();
-      } else {
-        console.log("Generering stoppet.");
       }
     }
   };
@@ -43,12 +37,12 @@ export default function ClientComponent({ initialImages }) {
   const startGenerating = () => {
     if (!isGeneratingRef.current) {
       isGeneratingRef.current = true;
-      generateImage(); // Start første generering umiddelbart
+      generateImage();
     }
   };
 
   const stopGenerating = () => {
-    isGeneratingRef.current = false; // Stoppe den rekursive genereringen
+    isGeneratingRef.current = false;
   };
 
   const handleImageClick = (image) => {
@@ -59,21 +53,29 @@ export default function ClientComponent({ initialImages }) {
     setSelectedImage(null);
   };
 
+  useEffect(() => {
+    const fetchInitialImages = async () => {
+      try {
+        const response = await axios.get("/api/listImages");
+        setImages(response.data);
+      } catch (error) {
+        console.error("Failed to fetch initial images:", error);
+      }
+    };
+
+    fetchInitialImages();
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center space-y-4">
       <div className="flex w-full max-w-sm items-center space-x-2 mb-8">
         <Button
-          type="button"
           onClick={startGenerating}
           disabled={loading || isGeneratingRef.current}
         >
           Start Generering
         </Button>
-        <Button
-          type="button"
-          onClick={stopGenerating}
-          disabled={!isGeneratingRef.current}
-        >
+        <Button onClick={stopGenerating} disabled={!isGeneratingRef.current}>
           Stopp Generering
         </Button>
       </div>
@@ -85,8 +87,7 @@ export default function ClientComponent({ initialImages }) {
               alt={`Generated ${index}`}
               width={500}
               height={500}
-              className="rounded-lg shadow-lg cursor-pointer"
-              onClick={() => handleImageClick(image)}
+              className="rounded-lg shadow-lg"
             />
           </div>
         ))}
