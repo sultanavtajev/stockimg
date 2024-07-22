@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import cloudinary from "cloudinary";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-export const maxDuration = 55;
-
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -14,6 +10,14 @@ cloudinary.v2.config({
 export async function GET() {
   try {
     console.log("Fetching images from Cloudinary...");
+    console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+    console.log("CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY);
+    console.log(
+      "CLOUDINARY_API_SECRET:",
+      process.env.CLOUDINARY_API_SECRET ? "Loaded" : "Not Loaded"
+    );
+    console.log("CLOUDINARY_FOLDER:", process.env.CLOUDINARY_FOLDER);
+
     const result = await cloudinary.v2.api.resources({
       type: "upload",
       prefix: process.env.CLOUDINARY_FOLDER,
