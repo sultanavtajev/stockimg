@@ -19,12 +19,12 @@ export async function POST() {
     );
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "user",
           content:
-            "Generate a random art prompt across various genres, such as abstract, surreal, impressionist, or minimalist, showcasing creativity and inspiration.",
+            "Generate a random art prompt across various art genres, such as abstract, surreal, impressionist, or minimalist, showcasing creativity and inspiration.",
         },
       ],
       max_tokens: 50,
