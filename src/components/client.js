@@ -55,7 +55,7 @@ export default function ClientComponent({ initialImages }) {
     <div className="flex flex-col items-center justify-center space-y-4">
       <div className="flex w-full max-w-sm items-center justify-center space-x-2 mb-8">
         <Button onClick={generateImage} disabled={loading}>
-          {loading ? "Genererer..." : "Generer bilde"}
+          {loading ? "Genererer bilde..." : "Generer bilde"}
         </Button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
