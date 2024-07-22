@@ -9,20 +9,18 @@ cloudinary.v2.config({
 
 export async function GET() {
   try {
-    console.log("Fetching images from Cloudinary...");
-    console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
-    console.log("CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY);
-    console.log("CLOUDINARY_API_SECRET:", process.env.CLOUDINARY_API_SECRET);
-    console.log("CLOUDINARY_FOLDER:", process.env.CLOUDINARY_FOLDER);
-
     const result = await cloudinary.v2.api.resources({
       type: "upload",
       prefix: process.env.CLOUDINARY_FOLDER,
-      max_results: 100,
+      max_results: 1000,
     });
 
-    const imageUrls = result.resources.map((file) => file.secure_url);
-    console.log("Fetched image URLs:", imageUrls);
+    // Extract the image URLs and sort them by filename in descending order
+    const imageUrls = result.resources
+      .sort((a, b) => b.public_id.localeCompare(a.public_id))
+      .map((file) => file.secure_url);
+
+    console.log("Fetched and sorted image URLs:", imageUrls);
 
     return NextResponse.json(imageUrls);
   } catch (error) {

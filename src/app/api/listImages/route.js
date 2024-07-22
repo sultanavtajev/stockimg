@@ -16,18 +16,20 @@ export async function GET() {
     const result = await cloudinary.v2.api.resources({
       type: "upload",
       prefix: process.env.CLOUDINARY_FOLDER,
-      max_results: 100,
+      max_results: 1000,
       resource_type: "image",
-      direction: "desc",
-      sort_by: {
-        created_at: "desc",
-      },
     });
 
-    const imageUrls = result.resources.map((file) => file.secure_url);
+    // Extract the image URLs and sort them by filename in descending order
+    const imageUrls = result.resources
+      .sort((a, b) => b.public_id.localeCompare(a.public_id))
+      .map((file) => file.secure_url);
+
+    console.log("Fetched and sorted image URLs:", imageUrls);
 
     return NextResponse.json(imageUrls);
   } catch (error) {
+    console.error("Failed to fetch images from Cloudinary:", error);
     return NextResponse.json(
       { error: "Failed to list images" },
       { status: 500 }
