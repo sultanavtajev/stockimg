@@ -3,7 +3,9 @@ import OpenAI from "openai";
 import axios from "axios";
 import cloudinary from "cloudinary";
 
-
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const maxDuration = 55;
 
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
